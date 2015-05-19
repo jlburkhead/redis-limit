@@ -1,5 +1,5 @@
 # redis-limit
-[![Build Status](https://travis-ci.org/lausan/redis-limit.svg?branch=master)](https://travis-ci.org/lausan/redis-limit)
+[![Build Status](https://travis-ci.org/jlburkhead/redis-limit.svg)](https://travis-ci.org/jlburkhead/redis-limit)
 
 [![NPM](https://nodei.co/npm/redis-limit.png?downloads=true&downloadRank=true)](https://nodei.co/npm/redis-limit/)
 [![NPM](https://nodei.co/npm-dl/redis-limit.png?months=6&height=3)](https://nodei.co/npm/redis-limit/)
