@@ -8,19 +8,19 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/lausan/redis-rate-limiter.git"
+    "url": "https://github.com/jlburkhead/redis-rate-limiter.git"
   },
   "keywords": [
     "redis",
     "rate-limiter",
     "token-bucket"
   ],
-  "author": "lausan",
+  "author": "jlburkhead",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/lausan/redis-rate-limiter/issues"
+    "url": "https://github.com/jlburkhead/redis-rate-limiter/issues"
   },
-  "homepage": "https://github.com/lausan/redis-rate-limiter",
+  "homepage": "https://github.com/jlburkhead/redis-rate-limiter",
   "devDependencies": {
     "async": "^0.9.0",
     "tap": "^1.0.5"
