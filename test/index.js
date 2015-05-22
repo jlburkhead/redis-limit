@@ -65,7 +65,7 @@ test("input validation", function(t) {
 
 });
 
-test("limiter consumes tokens for different clients", function(t) {
+test("limiter consumes tokens for different keys", function(t) {
   t.plan(1);
   var client = redis.createClient();
   var options = {
@@ -102,7 +102,7 @@ test("limiter consumes tokens for different clients", function(t) {
 
 });
 
-test("limiter consumes tokens for different clients - load", function(t) {
+test("limiter consumes tokens for different keys - load", function(t) {
   t.plan(1);
   var client = redis.createClient();
   var options = {
@@ -148,7 +148,7 @@ test("limiter consumes tokens for different clients - load", function(t) {
 
 });
 
-test("limiter refills for different clients", function(t) {
+test("limiter refills for different keys", function(t) {
   t.plan(3);
   var client = redis.createClient();
   var options = {
@@ -225,7 +225,7 @@ test("limiter refills for different clients", function(t) {
 
 });
 
-test("limiter refills for different clients - load", function(t) {
+test("limiter refills for different keys - load", function(t) {
   t.plan(3);
   var client = redis.createClient();
   var options = {
@@ -614,6 +614,46 @@ test("redis ttl functions - load", function(t) {
       });
     });
 
+  });
+
+});
+
+test("multiple limiters can share a namespace", function(t) {
+  t.plan(1);
+  var namespace = Math.random().toString(36).slice(2);
+  var client1 = redis.createClient();
+  var limiter1 = RedisRateLimiter({
+    redis: client1,
+    maxInInterval: 2,
+    interval: 2000,
+    namespace: namespace
+  });
+  var client2 = redis.createClient();
+  var limiter2 = RedisRateLimiter({
+    redis: client2,
+    maxInInterval: 2,
+    interval: 2000,
+    namespace: namespace
+  });
+
+  async.series([
+    function(callback) {
+      limiter1("foo", callback);
+    },
+    function(callback) {
+      limiter2("foo", callback);
+    },
+    function(callback) {
+      limiter1("foo", callback);
+    },
+    function(callback) {
+      limiter2("foo", callback);
+    }
+  ], function(err, tokens) {
+    client1.quit();
+    client2.quit();
+    if (err) return t.fail(err);
+    t.similar(tokens, [0, 0, 1000, 1000]);
   });
 
 });

@@ -12,7 +12,7 @@ function RedisRateLimiter(options) {
       maxInInterval = options.maxInInterval,
       minDifference = options.minDifference || 0,
       namespace = options.namespace || "redis-rate-limiter-" + Math.random().toString(36).slice(2);
-  var result, sha;
+  var result, sha, load;
 
   assert(redis, "`options.redis` must be a redis client");
   assert(interval === Infinity || interval > 0 && isInt(options.interval), "`options.interval` must be a positive integer");
@@ -30,6 +30,23 @@ function RedisRateLimiter(options) {
              = maxInInterval
   */
 
+  function redisEvalsha(args, cb) {
+    redis.evalsha(args, function(err, res) {
+      if (err) return cb(err);
+      res = Number(res);
+      if (res < 0) {
+        // this is the time until minDifference is satisfied in milliseconds
+        return cb(null, -Math.floor(res));
+      } else if (res === 0) {
+        // no tokens left so the client will have to wait 1 / fillRate milliseconds
+        return cb(null, 1 / fillRate);
+      } else {
+        // there are tokens
+        return cb(null, 0);
+      }
+    });
+  }
+
   result = function (id, cb) {
     if (!cb) {
       cb = id;
@@ -45,7 +62,7 @@ function RedisRateLimiter(options) {
     var lastAccessedKey = key + ":timestamp";
 
     var args = [
-      sha || lua, // sha from SCRIPT LOAD or lua script as string or buffer
+      sha,
       2, // number of keys
       tokenKey,
       lastAccessedKey,
@@ -56,24 +73,19 @@ function RedisRateLimiter(options) {
       isFinite(interval) ? Math.ceil(interval / 1000) : 0 // interval in seconds for redis ttl
     ];
 
-    redis[sha ? "evalsha" : "eval"](args, function(err, res) {
-      if (err) return cb(err);
-      res = Number(res);
-      if (res < 0) {
-        // this is the time until minDifference is satisfied in milliseconds
-        return cb(null, -Math.floor(res));
-      } else if (res === 0) {
-        // no tokens left so the client will have to wait 1 / fillRate milliseconds
-        return cb(null, 1 / fillRate);
-      } else {
-        // there are tokens
-        return cb(null, 0);
-      }
-    });
+    if (!sha) {
+      load(function(err) {
+        if (err) return cb(err);
+        args[0] = sha;
+        redisEvalsha(args, cb);
+      })
+    } else {
+      redisEvalsha(args, cb);
+    }
 
   }
 
-  result.load = function(cb) {
+  result.load = load = function(cb) {
     redis.script(["LOAD", lua], function(err, result) {
       if (err) return cb(err);
       sha = result;
