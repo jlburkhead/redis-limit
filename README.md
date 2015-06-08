@@ -1,5 +1,6 @@
 # redis-limit
 [![Build Status](https://travis-ci.org/jlburkhead/redis-limit.svg)](https://travis-ci.org/jlburkhead/redis-limit)
+[![Coverage Status](https://coveralls.io/repos/jlburkhead/redis-limit/badge.svg?branch=master)](https://coveralls.io/r/jlburkhead/redis-limit?branch=master)
 
 [![NPM](https://nodei.co/npm/redis-limit.png?downloads=true&downloadRank=true)](https://nodei.co/npm/redis-limit/)
 [![NPM](https://nodei.co/npm-dl/redis-limit.png?months=6&height=3)](https://nodei.co/npm/redis-limit/)
